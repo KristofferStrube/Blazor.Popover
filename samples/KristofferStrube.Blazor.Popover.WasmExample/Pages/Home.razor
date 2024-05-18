@@ -1,0 +1,28 @@
+﻿@page "/"
+
+<PageTitle>Blazor.Popover</PageTitle>
+
+<h1>Blazor.Popover</h1>
+
+<p>Here you can try to use a popover</p>
+
+<button class="btn btn-primary" popovertarget="my-modal">Open dismissable modal</button>
+
+<Popover @ref=Modal Id="my-modal" style="padding:10px;border-radius:10px;width:400px;max-width:100%;border:0px;box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">
+    <div style="display:flex;flex-direction:row;">
+        <h2 style="flex:1;">This is a modal!</h2>
+        <b>
+            <big style="cursor:pointer;" title="This will also close it by calling a method." @onclick="Modal.HidePopoverAsync">
+                X
+            </big>
+        </b>
+    </div>
+    <p>If you press outside this it will close.</p>
+    <button class="btn btn-secondary" @onclick="() => count++">Count @count</button>
+</Popover>
+
+@code {
+    private int count;
+
+    public required Popover Modal { get; set; }
+}
