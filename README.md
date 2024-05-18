@@ -4,7 +4,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/KristofferStrube/Blazor.Popover)](https://github.com/KristofferStrube/Blazor.Popover/stargazers)
 
 # Blazor.WebAudio
-A Blazor wrapper for the part of the HTML API related to the [popover attribute](https://html.spec.whatwg.org/multipage/popover.html)
+A Blazor wrapper for the part of the HTML API related to the [popover attribute](https://html.spec.whatwg.org/multipage/popover.html).
+
 The API makes it easy to make a popover in HTML. This wrapper wraps the attributes and methods exposed in that API to Blazor via the <code>&lt;Popover&gt;</code> component to make it easy to use.
 
 **This wrapper is still under development.**
