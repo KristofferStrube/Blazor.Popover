@@ -10,6 +10,11 @@ The API makes it easy to make a popover in HTML. This wrapper wraps the attribut
 
 **This wrapper is still under development.**
 
+# Demo
+The sample project can be demoed at https://kristofferstrube.github.io/Blazor.Popover/
+
+On each page, you can find the corresponding code for the example in the top right corner.
+
 # Related articles
 This repository was built with inspiration and help from the following series of articles:
 
