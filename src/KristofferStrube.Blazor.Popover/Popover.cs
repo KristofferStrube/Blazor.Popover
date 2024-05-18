@@ -66,9 +66,34 @@ public class Popover : ComponentBase
     [Parameter]
     public string TagType { get; set; } = "div";
 
+    /// <summary>
+    /// Shows the popover element by adding it to the top layer.
+    /// If element's popover attribute is in the <see cref="PopoverType.Auto"/> state, then this will also close all other auto popovers unless they are an ancestor of element according to the topmost popover ancestor algorithm.
+    /// </summary>
+    public async Task ShowPopoverAsync()
+    {
+        IJSObjectReference popover = await popoverJSObjectReference.Value;
+        await popover.InvokeVoidAsync("showPopover");
+    }
+
+    /// <summary>
+    /// Hides the popover element by removing it from the top layer and applying <c>display: none</c> to it.
+    /// </summary>
     public async Task HidePopoverAsync()
     {
         IJSObjectReference popover = await popoverJSObjectReference.Value;
         await popover.InvokeVoidAsync("hidePopover");
+    }
+
+    /// <summary>
+    /// If the popover element is not showing, then this method shows it. Otherwise, this method hides it.
+    /// </summary>
+    /// <returns>
+    /// This method returns <see langword="true"/> if the popover is open after calling it, otherwise  <see langword="false"/>.
+    /// </returns>
+    public async Task<bool> TogglePopoverAsync()
+    {
+        IJSObjectReference popover = await popoverJSObjectReference.Value;
+        return await popover.InvokeAsync<bool>("hidePopover");
     }
 }
