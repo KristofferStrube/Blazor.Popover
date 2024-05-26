@@ -8,26 +8,43 @@
 
 <h1>Tooltip</h1>
 
-<p>Here we have implemented tooltips using popovers and the <a href="https://github.com/KristofferStrube/Blazor.CSSView/" target="_blank">Blazor.CSSView</a> to position them dynamically.</p>
+<p>Here we have implemented tooltips using the popover API to display the tooltip and the <a href="https://github.com/KristofferStrube/Blazor.CSSView/" target="_blank">Blazor.CSSView</a> library to position them dynamically.</p>
 
-<button @ref=buttonReference class="btn btn-primary" popovertarget="tooltip">Open Tooltip</button>
+<p>A nice functionality of the popover API is that only one popover can be visible at once (by default). So if you have one tooltip open and opens another, the first will close. This behavior is of cause confgurable.</p>
 
-<Popover @ref=Popover Id="tooltip" style=@popoverStyle>
-    Tooltip content
+<button @ref=buttonReference class="btn btn-primary" popovertarget="tooltip-click">Open Tooltip</button>
+
+<br /><br />
+
+<span @ref=spanReference class ="badge bg-primary" @onpointerenter=HoverEnter @onpointerout=HoverOut>Hover this</span>
+
+<Popover @ref=TooltipClick Id="tooltip-click" style=@tooltipClickStyle>
+    Hey you clicked!
+</Popover>
+
+<Popover @ref=TooltipHover style=@tooltipHoverStyle>
+    And you can hover!
 </Popover>
 
 @code {
     Window? window;
     EventListener<ToggleEvent>? toggleEventListener;
     EventListener<Event>? updateCoordinatesEventListener;
-    private double left;
-    private double top;
-    private string popoverStyle => $"margin:0;top:{top.AsString()}px;left:{left.AsString()}px;height:32px;border-radius:5px;border:0px;box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;";
+    private double tooltipClickTop;
+    private double tooltipClickLeft;
+    private string tooltipClickStyle => $"margin:0;top:{tooltipClickTop.AsString()}px;left:{tooltipClickLeft.AsString()}px;height:32px;border-radius:5px;border:0px;box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;";
+
+    private double tooltipHoverTop;
+    private double tooltipHoverLeft;
+    private string tooltipHoverStyle => $"text-align:center;margin:0;top:{tooltipHoverTop.AsString()}px;left:{tooltipHoverLeft.AsString()}px;width:200px;border-radius:5px;border:0px;box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;";
 
     ElementReference buttonReference;
     Element button = default!;
+    ElementReference spanReference;
+    Element span = default!;
 
-    public required Popover Popover { get; set; }
+    public required Popover TooltipClick { get; set; }
+    public required Popover TooltipHover { get; set; }
 
     [Inject]
     public required IWindowService WindowService { get; set; }
@@ -40,6 +57,7 @@
         if (!firstRender) return;
 
         button = await Element.CreateAsync(JSRuntime, buttonReference);
+        span = await Element.CreateAsync(JSRuntime, spanReference);
         await UpdateCoodinates();
 
         toggleEventListener = await EventListener<ToggleEvent>.CreateAsync(JSRuntime, async e =>
@@ -47,7 +65,7 @@
             await UpdateCoodinates();
             StateHasChanged();
         });
-        await Popover.AddOnBeforeToggleEventListener(toggleEventListener);
+        await TooltipClick.AddOnBeforeToggleEventListener(toggleEventListener);
 
         await SubscribeToWindowChangeEvents();
     }
@@ -66,16 +84,30 @@
 
     private async Task UpdateCoodinates()
     {
-        var domRect = await button.GetBoundingClientRectAsync();
-        top = domRect.Y + domRect.Height / 2 - 16;
-        left = domRect.X + domRect.Width + 5;
+        var buttonDomRect = await button.GetBoundingClientRectAsync();
+        tooltipClickTop = buttonDomRect.Y + (buttonDomRect.Height / 2) - 16;
+        tooltipClickLeft = buttonDomRect.X + buttonDomRect.Width + 5;
+
+        var spanDomRect = await span.GetBoundingClientRectAsync();
+        tooltipHoverTop = spanDomRect.Y + spanDomRect.Height + 5;
+        tooltipHoverLeft = Math.Max(5, spanDomRect.X + (spanDomRect.Width / 2) - 100);
+    }
+
+    public async Task HoverEnter()
+    {
+        await TooltipHover.ShowPopoverAsync();
+    }
+
+    public async Task HoverOut()
+    {
+        await TooltipHover.HidePopoverAsync();
     }
 
     public async ValueTask DisposeAsync()
     {
         if (toggleEventListener is not null)
         {
-            await Popover.RemoveOnBeforeToggleEventListener(toggleEventListener);
+            await TooltipClick.RemoveOnBeforeToggleEventListener(toggleEventListener);
             await toggleEventListener.DisposeAsync();
         }
         if (updateCoordinatesEventListener is not null && window is not null)

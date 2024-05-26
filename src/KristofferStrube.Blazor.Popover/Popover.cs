@@ -24,7 +24,10 @@ public class Popover : ComponentBase, IAsyncDisposable
 
         builder.AddMultipleAttributes(1, AdditionalAttributes);
 
-        builder.AddAttribute(2, "id", Id);
+        if (Id is not null)
+        {
+            builder.AddAttribute(2, "id", Id);
+        }
         builder.AddAttribute(3, "popover", Type is PopoverType.Auto ? "auto" : "manual");
         builder.AddContent(4, ChildContent);
         builder.AddElementReferenceCapture(5, value =>
@@ -57,8 +60,8 @@ public class Popover : ComponentBase, IAsyncDisposable
     /// <summary>
     /// The id of the popover element.
     /// </summary>
-    [Parameter, EditorRequired]
-    public required string Id { get; set; }
+    [Parameter]
+    public string? Id { get; set; }
 
     /// <summary>
     /// The type of element used for the popover element. This defaults to using a <c>div</c> tag.
