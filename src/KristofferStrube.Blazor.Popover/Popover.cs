@@ -1,5 +1,4 @@
 using KristofferStrube.Blazor.DOM;
-using KristofferStrube.Blazor.WebIDL;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.JSInterop;
@@ -103,13 +102,10 @@ public class Popover : ComponentBase, IAsyncDisposable
     /// </summary>
     /// <param name="callback">Callback that will be invoked when the event is dispatched.</param>
     /// <param name="options"><inheritdoc cref="EventTarget.AddEventListenerAsync{TEvent}(string, EventListener{TEvent}?, AddEventListenerOptions?)" path="/param[@name='options']"/></param>
-    public async Task<EventListener<ToggleEvent>> AddOnBeforeToggleEventListener(Func<ToggleEvent, Task> callback, AddEventListenerOptions? options = null)
+    public async Task AddOnBeforeToggleEventListener(EventListener<ToggleEvent> callback, AddEventListenerOptions? options = null)
     {
-        EventListener<ToggleEvent> eventListener = await EventListener<ToggleEvent>.CreateAsync(jsRuntime, callback);
-
         EventTarget popover = await lazyPopoverEventTarget.Value;
-        await popover.AddEventListenerAsync("beforetoggle", eventListener, options);
-        return eventListener;
+        await popover.AddEventListenerAsync("beforetoggle", callback, options);
     }
 
     /// <summary>

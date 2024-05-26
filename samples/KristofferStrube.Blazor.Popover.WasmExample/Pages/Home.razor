@@ -39,15 +39,19 @@
 
     public required Popover Popover { get; set; }
 
+    [Inject]
+    public required IJSRuntime JSRuntime { get; set; }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
-        myPopoverEventListener = await Popover.AddOnBeforeToggleEventListener(async (ToggleEvent e) =>
+        myPopoverEventListener = await EventListener<ToggleEvent>.CreateAsync(JSRuntime, async (ToggleEvent e) =>
         {
             myPopoverShown = (await e.GetNewState()) == "open";
             StateHasChanged();
         });
+        await Popover.AddOnBeforeToggleEventListener(myPopoverEventListener);
     }
 
     public async ValueTask DisposeAsync()
