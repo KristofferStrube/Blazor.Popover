@@ -6,7 +6,9 @@
 
 <p>Here you can try to use a popover</p>
 
-<button class="btn btn-primary" popovertarget="my-modal">Open dismissable modal</button>
+<button class="btn btn-primary" popovertarget="my-modal">Open popover with interactive content</button>
+
+<button class="btn btn-primary" popovertarget="backdrop">Open popover with backdrop</button>
 
 <Popover @ref=Modal Id="my-modal" style="padding:10px;border-radius:10px;width:400px;max-width:100%;border:0px;box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">
     <div style="display:flex;flex-direction:row;">
@@ -20,6 +22,8 @@
     <p>If you press outside this it will close.</p>
     <button class="btn btn-secondary" @onclick="() => count++">Count @count</button>
 </Popover>
+
+<Popover Id="backdrop" class="popover-backdrop">The backdrop behind this is blured.</Popover>
 
 @code {
     private int count;

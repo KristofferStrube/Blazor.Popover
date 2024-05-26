@@ -6,6 +6,10 @@ h1:focus {
     outline: none;
 }
 
+.popover-backdrop::backdrop {
+    backdrop-filter: blur(3px);
+}
+
 a, .btn-link {
     color: #0071c1;
 }
