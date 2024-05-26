@@ -1,16 +1,20 @@
 ﻿@page "/"
+@using KristofferStrube.Blazor.DOM
+@implements IAsyncDisposable
 
 <PageTitle>Blazor.Popover</PageTitle>
 
 <h1>Blazor.Popover</h1>
 
-<p>Here you can try to use a popover</p>
+<p>Here you can try to use a popover.</p>
+
+<p>The first popover is currently: <span class="badge bg-primary">@(myPopoverShown ? "show" : "hidden")</span></p>
 
 <button class="btn btn-primary" popovertarget="my-popover">Open popover with interactive content</button>
 
 <button class="btn btn-primary" popovertarget="backdrop">Open popover with backdrop</button>
 
-<Popover @ref=Modal Id="my-popover" style="padding:10px;border-radius:10px;width:400px;max-width:100%;border:0px;box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">
+<Popover @ref=Popover Id="my-popover" style="padding:10px;border-radius:10px;width:400px;max-width:100%;border:0px;box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">
     <div style="display:flex;flex-direction:row;">
         <h2 style="flex:1;">This is a modal!</h2>
         <span>
@@ -21,7 +25,7 @@
     </div>
     <p>If you press outside this it will close.</p>
     <button class="btn btn-secondary" @onclick="() => count++">Count @count</button>
-    <button class="btn btn-warning" title="This will also close it by calling a method." @onclick="Modal.HidePopoverAsync">
+    <button class="btn btn-warning" title="This will also close it by calling a method." @onclick="Popover.HidePopoverAsync">
         Close programmatically
     </button>
 </Popover>
@@ -30,6 +34,28 @@
 
 @code {
     private int count;
+    private EventListener<ToggleEvent>? myPopoverEventListener;
+    private bool myPopoverShown = false;
 
-    public required Popover Modal { get; set; }
+    public required Popover Popover { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        myPopoverEventListener = await Popover.AddOnBeforeToggleEventListener(async (ToggleEvent e) =>
+        {
+            myPopoverShown = (await e.GetNewState()) == "open";
+            StateHasChanged();
+        });
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (myPopoverEventListener is not null)
+        {
+            await Popover.RemoveOnBeforeToggleEventListener(myPopoverEventListener);
+            await myPopoverEventListener.DisposeAsync();
+        }
+    }
 }

@@ -1,20 +1,21 @@
+using KristofferStrube.Blazor.DOM;
+using KristofferStrube.Blazor.WebIDL;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.JSInterop;
 
 namespace KristofferStrube.Blazor.Popover;
 
-public class Popover : ComponentBase
+public class Popover : ComponentBase, IAsyncDisposable
 {
     private ElementReference? popoverElementReference;
-    private Lazy<Task<IJSObjectReference>> popoverJSObjectReference = default!;
+    private Lazy<Task<EventTarget>> lazyPopoverEventTarget = default!;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        popoverJSObjectReference = new(async () =>
+        lazyPopoverEventTarget = new(async () =>
         {
-            IJSObjectReference helper = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/KristofferStrube.Blazor.Popover/KristofferStrube.Blazor.Popover.js");
-            return await helper.InvokeAsync<IJSObjectReference>("self", popoverElementReference);
+            return await EventTarget.CreateAsync(jsRuntime, popoverElementReference!.Value);
         });
     }
 
@@ -22,7 +23,7 @@ public class Popover : ComponentBase
     {
         builder.OpenElement(0, TagType);
 
-        builder.AddMultipleAttributes(1, Microsoft.AspNetCore.Components.CompilerServices.RuntimeHelpers.TypeCheck<global::System.Collections.Generic.IEnumerable<global::System.Collections.Generic.KeyValuePair<string, object>>>(AdditionalAttributes));
+        builder.AddMultipleAttributes(1, AdditionalAttributes);
 
         builder.AddAttribute(2, "id", Id);
         builder.AddAttribute(3, "popover", Type is PopoverType.Auto ? "auto" : "manual");
@@ -40,13 +41,13 @@ public class Popover : ComponentBase
     private IJSRuntime jsRuntime { get; set; } = default!;
 
     [Parameter(CaptureUnmatchedValues = true)]
-    public Dictionary<string, object> AdditionalAttributes { get; set; }
+    public required Dictionary<string, object> AdditionalAttributes { get; set; }
 
     /// <summary>
     /// The content that will be rendered inside the popover
     /// </summary>
     [Parameter]
-    public RenderFragment ChildContent { get; set; }
+    public required RenderFragment ChildContent { get; set; }
 
     /// <summary>
     /// The behaviour of the popover. Defaults to <see cref="PopoverType.Auto"/>.
@@ -72,8 +73,8 @@ public class Popover : ComponentBase
     /// </summary>
     public async Task ShowPopoverAsync()
     {
-        IJSObjectReference popover = await popoverJSObjectReference.Value;
-        await popover.InvokeVoidAsync("showPopover");
+        EventTarget popover = await lazyPopoverEventTarget.Value;
+        await popover.JSReference.InvokeVoidAsync("showPopover");
     }
 
     /// <summary>
@@ -81,8 +82,8 @@ public class Popover : ComponentBase
     /// </summary>
     public async Task HidePopoverAsync()
     {
-        IJSObjectReference popover = await popoverJSObjectReference.Value;
-        await popover.InvokeVoidAsync("hidePopover");
+        EventTarget popover = await lazyPopoverEventTarget.Value;
+        await popover.JSReference.InvokeVoidAsync("hidePopover");
     }
 
     /// <summary>
@@ -93,7 +94,41 @@ public class Popover : ComponentBase
     /// </returns>
     public async Task<bool> TogglePopoverAsync()
     {
-        IJSObjectReference popover = await popoverJSObjectReference.Value;
-        return await popover.InvokeAsync<bool>("hidePopover");
+        EventTarget popover = await lazyPopoverEventTarget.Value;
+        return await popover.JSReference.InvokeAsync<bool>("togglePopover");
+    }
+
+    /// <summary>
+    /// Adds an <see cref="EventListener{ToggleEvent}"/> for when the popover element transitions between shown and hidden.
+    /// </summary>
+    /// <param name="callback">Callback that will be invoked when the event is dispatched.</param>
+    /// <param name="options"><inheritdoc cref="EventTarget.AddEventListenerAsync{TEvent}(string, EventListener{TEvent}?, AddEventListenerOptions?)" path="/param[@name='options']"/></param>
+    public async Task<EventListener<ToggleEvent>> AddOnBeforeToggleEventListener(Func<ToggleEvent, Task> callback, AddEventListenerOptions? options = null)
+    {
+        EventListener<ToggleEvent> eventListener = await EventListener<ToggleEvent>.CreateAsync(jsRuntime, callback);
+
+        EventTarget popover = await lazyPopoverEventTarget.Value;
+        await popover.AddEventListenerAsync("beforetoggle", eventListener, options);
+        return eventListener;
+    }
+
+    /// <summary>
+    /// Removes the event listener from the event listener list if it has been parsed to <see cref="AddOnBeforeToggleEventListener"/> previously.
+    /// </summary>
+    /// <param name="callback">The callback <see cref="EventListener{TEvent}"/> that you want to stop listening to events.</param>
+    /// <param name="options"><inheritdoc cref="EventTarget.RemoveEventListenerAsync{TEvent}(string, EventListener{TEvent}?, EventListenerOptions?)" path="/param[@name='options']"/></param>
+    public async Task RemoveOnBeforeToggleEventListener(EventListener<ToggleEvent> callback, EventListenerOptions? options = null)
+    {
+        EventTarget popover = await lazyPopoverEventTarget.Value;
+        await popover.RemoveEventListenerAsync("beforetoggle", callback, options);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (lazyPopoverEventTarget.IsValueCreated)
+        {
+            EventTarget popover = await lazyPopoverEventTarget.Value;
+            await popover.DisposeAsync();
+        }
     }
 }
