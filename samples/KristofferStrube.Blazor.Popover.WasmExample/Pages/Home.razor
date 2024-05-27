@@ -16,7 +16,7 @@
 
 <Popover @ref=Popover Id="my-popover" style="padding:10px;border-radius:10px;width:400px;max-width:100%;border:0px;box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">
     <div style="display:flex;flex-direction:row;">
-        <h2 style="flex:1;">This is a modal!</h2>
+        <h2 style="flex:1;">This is a popover!</h2>
         <span>
             <button class="btn btn-secondary btn-sm" title="This uses the popovertargetaction-attribute to specify that the popover should be hidden." popovertarget="my-popover" popovertargetaction="hide">
                 X
@@ -30,7 +30,9 @@
     </button>
 </Popover>
 
-<Popover Id="backdrop" class="popover-backdrop">The backdrop behind this is blured.</Popover>
+<Popover Id="backdrop" class="popover-backdrop">
+    The backdrop behind this is blured.
+</Popover>
 
 @code {
     private int count;
