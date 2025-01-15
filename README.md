@@ -2,6 +2,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/KristofferStrube/Blazor.Popover)](https://github.com/KristofferStrube/Blazor.Popover/issues)
 [![GitHub forks](https://img.shields.io/github/forks/KristofferStrube/Blazor.Popover)](https://github.com/KristofferStrube/Blazor.Popover/network/members)
 [![GitHub stars](https://img.shields.io/github/stars/KristofferStrube/Blazor.Popover)](https://github.com/KristofferStrube/Blazor.Popover/stargazers)
+[![NuGet Downloads (official NuGet)](https://img.shields.io/nuget/dt/KristofferStrube.Blazor.Popover?label=NuGet%20Downloads)](https://www.nuget.org/packages/KristofferStrube.Blazor.Popover/)
 
 # Blazor.Popover
 A Blazor wrapper for the part of the HTML API related to the [popover attribute](https://html.spec.whatwg.org/multipage/popover.html).
